@@ -1,2 +1,1 @@
-# INFDEV01-6A
-Algorithms and data structures course at Hogeschool Rotterdam.
+# DEV01-6A
