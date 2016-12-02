@@ -8,40 +8,96 @@ namespace EntryPoint
 #if WINDOWS || LINUX
   public static class Program
   {
-
-    [STAThread]
+        [STAThread]
     static void Main()
     {
 
-      var fullscreen = false;
-      read_input:
-      switch (Microsoft.VisualBasic.Interaction.InputBox("Which assignment shall run next? (1, 2, 3, 4, or q for quit)", "Choose assignment", VirtualCity.GetInitialValue()))
-      {
-        case "1":
-          using (var game = VirtualCity.RunAssignment1(SortSpecialBuildingsByDistance, fullscreen))
-            game.Run();
-          break;
-        case "2":
-          using (var game = VirtualCity.RunAssignment2(FindSpecialBuildingsWithinDistanceFromHouse, fullscreen))
-            game.Run();
-          break;
-        case "3":
-          using (var game = VirtualCity.RunAssignment3(FindRoute, fullscreen))
-            game.Run();
-          break;
-        case "4":
-          using (var game = VirtualCity.RunAssignment4(FindRoutesToAll, fullscreen))
-            game.Run();
-          break;
-        case "q":
-          return;
-      }
-      goto read_input;
+        var fullscreen = false;
+        read_input:
+        switch (Microsoft.VisualBasic.Interaction.InputBox("Which assignment shall run next? (1, 2, 3, 4, or q for quit)", "Choose assignment", VirtualCity.GetInitialValue()))
+        {
+            case "1":
+                using (var game = VirtualCity.RunAssignment1(SortSpecialBuildingsByDistance, fullscreen))
+                    game.Run();
+                break;
+            case "2":
+                using (var game = VirtualCity.RunAssignment2(FindSpecialBuildingsWithinDistanceFromHouse, fullscreen))
+                    game.Run();
+                break;
+            case "3":
+                using (var game = VirtualCity.RunAssignment3(FindRoute, fullscreen))
+                    game.Run();
+                break;
+            case "4":
+                using (var game = VirtualCity.RunAssignment4(FindRoutesToAll, fullscreen))
+                    game.Run();
+                break;
+            case "q":
+                return;
+        }
+        goto read_input;
     }
 
-    private static IEnumerable<Vector2> SortSpecialBuildingsByDistance(Vector2 house, IEnumerable<Vector2> specialBuildings)
+        static public double Distance(Vector2 v, Vector2 house)
+        {
+            return Math.Sqrt(Math.Pow((house.X - v.X), 2) + Math.Pow((house.Y - v.Y), 2));
+        }
+
+
+        static public void DoMerge(Vector2[] vectors, int left, int mid, int right, Vector2 house)
+        {
+            Vector2[] temp = new Vector2[vectors.Count()];
+            int i, left_end, elements, tmp_pos;
+
+            left_end = (mid - 1);
+            tmp_pos = left;
+            elements = (right - left + 1);
+
+            while ((left <= left_end) && (mid <= right))
+            {
+                if (Distance(vectors[left], house) <= Distance(vectors[mid], house))
+                    temp[tmp_pos++] = vectors[left++];
+                else
+                    temp[tmp_pos++] = vectors[mid++];
+            }
+
+            while (left <= left_end)
+                temp[tmp_pos++] = vectors[left++];
+
+            while (mid <= right)
+                temp[tmp_pos++] = vectors[mid++];
+
+            for (i = 0; i < elements; i++)
+            {
+                vectors[right] = temp[right];
+                right--;
+            }
+        }
+
+        static public void MergeSort_Recursive(Vector2[] numbers, int left, int right, Vector2 house)
+        {
+            int mid;
+
+            if (right > left)
+            {
+                mid = (right + left) / 2;
+                MergeSort_Recursive(numbers, left, mid, house);
+                MergeSort_Recursive(numbers, (mid + 1), right, house);
+
+                DoMerge(numbers, left, (mid + 1), right, house);
+            }
+        }
+
+        private static IEnumerable<Vector2> SortSpecialBuildingsByDistance(Vector2 house, IEnumerable<Vector2> specialBuildings)
     {
-      return specialBuildings.OrderBy(v => Vector2.Distance(v, house));
+
+            Vector2[] array = specialBuildings.ToArray();
+
+            MergeSort_Recursive(array, 0, array.Count() - 1, house);
+
+
+
+            return array;
     }
 
     private static IEnumerable<IEnumerable<Vector2>> FindSpecialBuildingsWithinDistanceFromHouse(
