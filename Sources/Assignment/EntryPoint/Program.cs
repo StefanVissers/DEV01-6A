@@ -74,17 +74,17 @@ namespace EntryPoint
             }
         }
 
-        static public void MergeSort_Recursive(Vector2[] numbers, int left, int right, Vector2 house)
+        static public void MergeSort_Recursive(Vector2[] vectors, int left, int right, Vector2 house)
         {
             int mid;
 
             if (right > left)
             {
                 mid = (right + left) / 2;
-                MergeSort_Recursive(numbers, left, mid, house);
-                MergeSort_Recursive(numbers, (mid + 1), right, house);
+                MergeSort_Recursive(vectors, left, mid, house);
+                MergeSort_Recursive(vectors, (mid + 1), right, house);
 
-                DoMerge(numbers, left, (mid + 1), right, house);
+                DoMerge(vectors, left, (mid + 1), right, house);
             }
         }
 
@@ -95,8 +95,6 @@ namespace EntryPoint
 
             MergeSort_Recursive(array, 0, array.Count() - 1, house);
 
-
-
             return array;
     }
 
@@ -104,12 +102,17 @@ namespace EntryPoint
       IEnumerable<Vector2> specialBuildings, 
       IEnumerable<Tuple<Vector2, float>> housesAndDistances)
     {
-      return
+            Tree tree = new Tree(specialBuildings.ToArray());
+            
+            return tree.Traverse(tree, housesAndDistances).ToArray();
+
+      
+      /* return
           from h in housesAndDistances
           select
             from s in specialBuildings
             where Vector2.Distance(h.Item1, s) <= h.Item2
-            select s;
+            select s; */
     }
 
     private static IEnumerable<Tuple<Vector2, Vector2>> FindRoute(Vector2 startingBuilding, 
